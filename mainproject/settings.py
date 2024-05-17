@@ -177,3 +177,12 @@ AUTHENTICATION_BACKENDS = [
 
 # AUTH_USER_MODEL = 'egapp.User'
 
+ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://toeman.online',
+    'https://www.toeman.online',
+]
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_DOMAIN = 'toeman.online'
