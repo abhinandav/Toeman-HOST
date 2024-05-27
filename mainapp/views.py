@@ -238,9 +238,12 @@ def profile(request, uid):
         return redirect('login')
     user = User.objects.get(id=uid)
     user_orders=Order.objects.filter(user=user,is_ordered=True).count()
-    total_spent = Payment.objects.filter(user=user,status='Paid').aggregate(total_amount=Sum('amount_paid'))[
-        'total_amount']
-    total_spent = total_spent if total_spent is not None else 0.0
+    try:
+        total_spent = Payment.objects.filter(user=user,status='Paid').aggregate(total_amount=Sum('amount_paid'))[
+            'total_amount']
+        total_spent = total_spent if total_spent is not None else 0.0
+    except :
+        total_spent=0
 
     try:
         profile = Profile.objects.get(user=user)
