@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-)vs%lc)oga%n!o9fl3ao8i%)ybe28!=q9*wnp3n$qdlx@p3&76
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -86,26 +86,26 @@ WSGI_APPLICATION = 'mainproject.wsgi.application'
 
 # db
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'myproject',
-#         'USER': 'myprojectuser',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
-
-
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myproject',
+        'USER': 'myprojectuser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
+
+
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -173,12 +173,12 @@ AUTHENTICATION_BACKENDS = [
 
 # AUTH_USER_MODEL = 'egapp.User'
 
-# ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
+ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
 
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://toeman.online',
-#     'https://www.toeman.online',
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://toeman.online',
+    'https://www.toeman.online',
+]
 
-# CSRF_COOKIE_SECURE = True
-# CSRF_COOKIE_DOMAIN = 'toeman.online'
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_DOMAIN = 'toeman.online'
