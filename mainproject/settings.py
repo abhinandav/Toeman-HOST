@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-)vs%lc)oga%n!o9fl3ao8i%)ybe28!=q9*wnp3n$qdlx@p3&76
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -86,30 +86,27 @@ WSGI_APPLICATION = 'mainproject.wsgi.application'
 
 # db
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myproject',
-        'USER': 'myprojectuser',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
-# DATABASES["default"]=)
-
-
-
-# import dj_database_url
-#
-# DATABASES={
-#     'default':dj_database_url.parse("")
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'myproject',
+#         'USER': 'myprojectuser',
+#         'PASSWORD': 'password',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
 # }
 
-# postgres://toeman_user:CUNXgByksuULo5MnpgGHXLZwQMQs0Me5@dpg-cp2p6ssf7o1s73bkumi0-a.oregon-postgres.render.com/toeman
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -144,10 +141,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 import os
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
+STATICFILES_DIRS=[os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT=os.path.join(BASE_DIR, 'assets')
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -155,7 +153,7 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#
+
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -175,12 +173,12 @@ AUTHENTICATION_BACKENDS = [
 
 # AUTH_USER_MODEL = 'egapp.User'
 
-ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
+# ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://toeman.online',
-    'https://www.toeman.online',
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://toeman.online',
+#     'https://www.toeman.online',
+# ]
 
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_DOMAIN = 'toeman.online'
+# CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_DOMAIN = 'toeman.online'
