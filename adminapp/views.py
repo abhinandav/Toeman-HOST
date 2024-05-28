@@ -17,7 +17,15 @@ from django.db.models import F, Sum, Count
 from .models import *
 from datetime import datetime
 from .forms import ProductAttributeForm
+from django.core.files.images import get_image_dimensions
+import imghdr
 
+def is_valid_image(image):
+    valid_image_types = ['jpeg', 'png','webp','avif','jpg']
+    if image:
+        image_type = imghdr.what(image)
+        return image_type in valid_image_types
+    return True
 
 def admin_home(request):
     if not request.user.is_superuser:
@@ -138,11 +146,19 @@ def add_product(request):
             messages.error(request, "Offer price cannot be greater than the original price.")
             return redirect('add_product')
 
+        images = [image1, image2, image3, image4, image5]
+        for img in images:
+            if img and not is_valid_image(img):
+                messages.error(request, "Invalid image type. Only JPEG and PNG are allowed.")
+                return redirect('add_product')
+
         try:
             category = Category.objects.get(id=category_id)
         except Category.DoesNotExist:
             messages.error(request, "Invalid category selected.")
             return redirect('add_product')
+
+
 
         product = Products(
             product_name=product_name,
@@ -261,24 +277,37 @@ def edit_products(request, p_id):
         if image5:
             product.product_image5 = image5
 
-        # if not (
-        #         product_name and brand_name and old_price and price and description and quantity and color and image1 and image2 and image3 and image4 and image5 and material and special_feature and sizes):
-        #     messages.error(request, "Please provide all required fields.")
-        #
-        #
-        # if not (price.isdigit() and old_price.isdigit() and int(price) >= 0 and int(old_price) >= 0):
-        #     messages.error(request, "Please enter valid prices.")
-        #
-        #
-        # if int(price) > int(old_price):
-        #     messages.error(request, "Offer price cannot be greater than the original price.")
-        #
-        #
-        # try:
-        #     category = Category.objects.get(id=category_id)
-        # except Category.DoesNotExist:
-        #     messages.error(request, "Invalid category selected.")
-        #
+        if not (
+                product_name or brand_name or old_price or price or description or quantity or color  or material or image5 or image1 or image2 or image3 or image4 or special_feature or sizes):
+            messages.error(request, "Please provide all required fields.")
+            return redirect('edit_products',p_id=p_id)
+
+
+        if not (price.isdigit()   and old_price.isdigit() and int(price) >= 0 and int(old_price) >= 0):
+            messages.error(request, "Please enter valid prices.")
+            return redirect('edit_products',p_id=p_id)
+
+
+
+        if int(price) > int(old_price):
+            messages.error(request, "Offer price cannot be greater than the original price.")
+            return redirect('edit_products',p_id=p_id)
+
+
+
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            messages.error(request, "Invalid category selected.")
+            return redirect('edit_products',p_id=p_id)
+
+        images = [image1, image2, image3, image4, image5]
+        for img in images:
+            if img and not is_valid_image(img):
+                messages.error(request, "Invalid image type. Only JPEG and PNG are allowed.")
+                return redirect('edit_products', p_id=p_id)
+
+
 
         product.quantity = quantity
         product.category = category
@@ -327,6 +356,12 @@ def add_categories(request):
             messages.error(request, "Category already exist")
             return redirect('add_categories')
 
+        images = [cat_image]
+        for img in images:
+            if img and not is_valid_image(img):
+                messages.error(request, "Invalid image type. Only JPEG and PNG are allowed.")
+                return redirect('add_categories')
+
         category = Category(
             category_name=cat_name,
             category_image=cat_image,
@@ -355,10 +390,22 @@ def edit_categories(request, c_id):
     if request.method == 'POST':
         cat_name = request.POST.get('category_name')
         cat_desc = request.POST.get('category_description')
-
         if 'category_image' in request.FILES:
             cat_image = request.FILES.get('category_image')
             category.category_image = cat_image
+            images = [cat_image]
+            for img in images:
+                if img and not is_valid_image(img):
+                    messages.error(request, "Invalid image type. Only JPEG and PNG are allowed.")
+                    return redirect('edit_categories',c_id=c_id)
+
+        if not (cat_desc  and cat_name):
+            messages.error(request, "Please provide all required fields.")
+            return redirect('edit_categories',c_id=c_id)
+
+        if Category.objects.filter(category_name=cat_name).exclude(id=c_id).exists():
+            messages.error(request, "Category already exists.")
+            return redirect('edit_categories', c_id=c_id)
 
         category.category_name = cat_name
         category.category_desc = cat_desc
@@ -373,6 +420,9 @@ def edit_categories(request, c_id):
     except (EmptyPage, InvalidPage):
         categories = paginator.page(paginator.num_pages)
     return render(request, 'admin/edit_categories.html', {'category': category, 'categories': categories})
+
+
+
 
 
 def soft_delete_category(request, c_id):
@@ -996,7 +1046,7 @@ def edit_offers(request, o_id):
 
 def add_variants(request, p_id):
     product = get_object_or_404(Products, id=p_id)
-    variants = ProductAttribute.objects.filter(product=product)
+    variants = ProductAttribute.objects.filter(product=product).order_by('size')
     choices = ProductAttribute.SIZE_CHOICES
 
     if request.method == 'POST':
@@ -1006,6 +1056,10 @@ def add_variants(request, p_id):
         if not size or not quantity:
             messages.error(request, "Size and Quantity are required")
             return redirect('add_variants', p_id=p_id)
+        if ProductAttribute.objects.filter(product=product,size=size).exists():
+            messages.error(request, "Size already exists")
+            return redirect('add_variants', p_id=p_id)
+
 
         try:
             size_int = int(size)  # Convert 'size' to an integer
@@ -1047,7 +1101,7 @@ def list_variants(request, p_id, v_id):
 
 def edit_variants(request,p_id,v_id):
     product = get_object_or_404(Products, id=p_id)
-    variant_list = ProductAttribute.objects.filter(product=product)
+    variant_list = ProductAttribute.objects.filter(product=product).order_by('size')
     variant = ProductAttribute.objects.get(product=product,id=v_id)
     choices = ProductAttribute.SIZE_CHOICES
 
@@ -1058,6 +1112,10 @@ def edit_variants(request,p_id,v_id):
 
         if not size or not quantity:
             messages.error(request, "Size and Quantity are required")
+            return redirect('edit_variants', p_id=p_id,v_id=v_id)
+
+        if ProductAttribute.objects.filter(product=product,size=size).exclude(id=v_id).exists():
+            messages.error(request, "Size already exists")
             return redirect('edit_variants', p_id=p_id,v_id=v_id)
 
         try:

@@ -29,6 +29,7 @@ def checkout(request, total=0, quantity=0, cart_items=None):
 
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user, is_active=True,product__soft_delete=False)
+
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart, is_active=True,product__soft_delete=False)
@@ -38,8 +39,14 @@ def checkout(request, total=0, quantity=0, cart_items=None):
             quantity += cart_item.quantity
 
         for cart_item in cart_items:
-            if cart_item.variant.quantity < 1:
-                return redirect('/')
+            # if cart_item.variant.quantity < 1:
+            #     return redirect('/cart')
+            variant=ProductAttribute.objects.get(id=cart_item.variant_id)
+            if variant.quantity < cart_item.quantity:
+                msg=f"quantity of product {cart_item.product.product_name} changed"
+                messages.error(request,msg)
+                return redirect('/cartapp/cart')
+
 
         tax = (18 * total) / 100
         shipping = 0
@@ -93,6 +100,10 @@ def add_address(request, uid):
             messages.error(request, 'Invalid phone number. Please enter a 10-digit numeric phone number.')
             return redirect('checkout')
 
+        if not pincode.isdigit() or len(pincode)!=6:
+            messages.error(request, 'Invalid pincode.')
+            return redirect('checkout')
+
         address = Address(
             user=request.user,
             first_name=first_name,
@@ -141,9 +152,13 @@ def place_order(request, total=0, quantity=0):
         quantity += cart_item.quantity
 
     for cart_item in cart_items:
-        if cart_item.variant.quantity < 1:
-            messages.error(request, "Some of your items are out of stock.")
-            return redirect('checkout')
+        variant = ProductAttribute.objects.get(id=cart_item.variant_id)
+        if variant.quantity < cart_item.quantity:
+            msg = f"quantity of product {cart_item.product.product_name} changed"
+            messages.error(request, msg)
+            return redirect('/cartapp/cart')
+
+
 
     tax = (18 * total) / 100
     shipping = 0
@@ -198,10 +213,17 @@ def place_order(request, total=0, quantity=0):
 
 @login_required
 def payments(request, order_id):
+    stock='True'
     if not 'username' in request.session:
         return redirect('login')
     current_user = request.user
     cart_items = CartItem.objects.filter(user=current_user)
+
+    for cart_item in cart_items:
+        variant = ProductAttribute.objects.get(id=cart_item.variant_id)
+        if variant.quantity < cart_item.quantity:
+            stock='False'
+
     cart_count = cart_items.count()
     order = Order.objects.get(user=current_user, is_ordered=False, id=order_id)
     if cart_count <= 0:
@@ -216,6 +238,7 @@ def payments(request, order_id):
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
+
 
     tax = (18 * total) / 100
     shipping = 0
@@ -234,6 +257,7 @@ def payments(request, order_id):
         'shipping': shipping,
         'tax': tax,
         'grand_total': grand_total,
+        'stock':stock
     }
     return render(request, 'user/payments.html', context)
 
@@ -315,10 +339,22 @@ def order_confirmed(request, order_id):
 @transaction.atomic
 def cash_on_delivery(request, order_id):
     current_user = request.user
+
+    cart_items = CartItem.objects.filter(user=current_user)
+
+    for cart_item in cart_items:
+        variant = ProductAttribute.objects.get(id=cart_item.variant_id)
+        if variant.quantity < cart_item.quantity:
+            msg = f"quantity of product {cart_item.product.product_name} changed"
+            messages.error(request, msg)
+            return redirect('/cartapp/cart')
+
     try:
         order = Order.objects.get(id=order_id, user=current_user, is_ordered=False)
     except Order.DoesNotExist:
         return redirect('order_confirmed')
+
+
 
     total_amount = order.order_total
 
@@ -329,7 +365,7 @@ def cash_on_delivery(request, order_id):
     order.payment = payment
     order.save()
 
-    cart_items = CartItem.objects.filter(user=current_user)
+
 
     for cart_item in cart_items:
         variant = cart_item.variant
@@ -374,10 +410,19 @@ def cash_on_delivery(request, order_id):
 @transaction.atomic
 def confirm_razorpay_payment(request, order_id):
     current_user = request.user
+
+    cart_items = CartItem.objects.filter(user=current_user)
+    for cart_item in cart_items:
+        variant = ProductAttribute.objects.get(id=cart_item.variant_id)
+        if variant.quantity < cart_item.quantity:
+            msg = f"quantity of product {cart_item.product.product_name} changed"
+            messages.error(request, msg)
+            return redirect('/cartapp/cart')
     try:
         order = Order.objects.get(id=order_id, user=current_user, is_ordered=False)
     except Order.DoesNotExist:
         return redirect('order_confirmed')
+
 
     total_amount = order.order_total
 
@@ -387,7 +432,7 @@ def confirm_razorpay_payment(request, order_id):
     order.payment = payment
     order.save()
 
-    cart_items = CartItem.objects.filter(user=current_user)
+
 
     for cart_item in cart_items:
         variant = cart_item.variant
@@ -431,6 +476,17 @@ def confirm_razorpay_payment(request, order_id):
 def wallet_pay(request, order_id):
     user = request.user
     order = Order.objects.get(id=order_id)
+
+    cart_items = CartItem.objects.filter(user=user)
+
+    for cart_item in cart_items:
+        variant = ProductAttribute.objects.get(id=cart_item.variant_id)
+        if variant.quantity < cart_item.quantity:
+            msg = f"quantity of product {cart_item.product.product_name} changed"
+            messages.error(request, msg)
+            return redirect('/cartapp/cart')
+
+
     try:
         wallet = Wallet.objects.get(user=user)
 
@@ -450,6 +506,13 @@ def wallet_pay(request, order_id):
         wallet.save()
 
         cart_items = CartItem.objects.filter(user=user)
+
+        for cart_item in cart_items:
+            variant = ProductAttribute.objects.get(id=cart_item.variant_id)
+            if variant.quantity < cart_item.quantity:
+                msg = f"quantity of product {cart_item.product.product_name} changed"
+                messages.error(request, msg)
+                return redirect('/cartapp/cart')
 
         for cart_item in cart_items:
             variant = cart_item.variant

@@ -32,6 +32,30 @@
 
                             <form method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
+                                {% if messages %}
+                                                {% for msg in messages %}
+                                                    {% if msg.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                                                        <div class="messages">
+                                                            <div style="color: #cc0000;">
+                                                                {{ msg }}
+                                                            </div>
+                                                        </div>
+                                                    {% elif msg.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                                        <div class="messages">
+                                                            <div style="color: #cc0000;">
+                                                                {{ msg }}
+                                                            </div>
+                                                        </div>
+                                                    {% elif msg.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                                        <div class="messages">
+                                                            <div style="color: #00cc00;">
+                                                                {{ msg }}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                <br>
 
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label">Name</label>

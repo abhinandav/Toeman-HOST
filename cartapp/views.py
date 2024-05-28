@@ -115,9 +115,9 @@ def cart(request, total=0, quantity=0, cart_items=None):
             if cart_item.quantity > cart_item.variant.quantity:
                 cart_item.quantity = cart_item.variant.quantity
                 cart_item.save()
-                if cart_item.product.quantity < 1:
-                    cart_item.delete()
-                    return redirect('cart')
+                # if cart_item.product.quantity < 1:
+                #     cart_item.delete()
+                return redirect('cart')
 
             total += cart_item.product.price * cart_item.quantity
             quantity += cart_item.quantity
@@ -136,7 +136,6 @@ def cart(request, total=0, quantity=0, cart_items=None):
         'grand_total': grand_total,
     }
     return render(request, 'user/cart.html', context)
-
 
 def cart_plus(request, variant_id):
     variant = get_object_or_404(ProductAttribute, id=variant_id)

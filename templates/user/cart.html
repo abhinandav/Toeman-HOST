@@ -201,6 +201,29 @@
 
                 <div class="row">
                     <div class="col-12">
+                                                        {% if messages %}
+                {% for msg in messages %}
+                    {% if msg.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                        <div class="messages">
+                            <div style="color: #cc0000;">
+                                {{ msg }}
+                            </div>
+                        </div>
+                    {% elif msg.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                        <div class="messages">
+                            <div style="color: #cc0000;">
+                                {{ msg }}
+                            </div>
+                        </div>
+                    {% elif msg.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                        <div class="messages">
+                            <div style="color: #00cc00;">
+                                {{ msg }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
                         <div class="table-responsive">
                             <table class="table shopping-summery text-center clean bg-light" >
                                 <thead>
@@ -286,6 +309,7 @@
                         <div class="row mb-50">
                             <div class="col-lg-6 "></div>
                             <div class="col-lg-6 ">
+
                                 <div class="border p-md-4 p-30 border-radius cart-totals">
                                     <div class="heading_s1 mb-3">
                                         <h4>Cart Totals</h4>
