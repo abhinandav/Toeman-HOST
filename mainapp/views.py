@@ -231,7 +231,7 @@ def product(request, p_id, has_offer=False, average_rating=0):
     }
     return render(request, 'product/product.html', context)
 
-
+from django.db.models.functions import Cast
 @login_required
 def profile(request, uid):
     if not 'username' in request.session:
@@ -239,11 +239,18 @@ def profile(request, uid):
     user = User.objects.get(id=uid)
     user_orders=Order.objects.filter(user=user,is_ordered=True).count()
     # try:
-    total_spent = Payment.objects.filter(user=user,status='Paid').aggregate(total_amount=Sum('amount_paid'))[
-            'total_amount']
-    total_spent = total_spent if total_spent is not None else 0.0
+    # total_spent = Payment.objects.filter(user=user,status='Paid').aggregate(total_amount=Sum('amount_paid'))[
+    #         'total_amount']
+    # total_spent = total_spent if total_spent is not None else 0.0
     # except :
     #     total_spent=0
+
+    total_spent = Payment.objects.filter(user=user, status='Paid').annotate(
+        amount_paid_decimal=Cast('amount_paid', output_field=models.DecimalField(max_digits=10, decimal_places=2))
+    ).aggregate(total_amount=Sum('amount_paid_decimal'))['total_amount']
+
+    if total_spent is None:
+        total_spent = 0
 
     try:
         profile = Profile.objects.get(user=user)
