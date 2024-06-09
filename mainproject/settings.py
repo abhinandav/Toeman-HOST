@@ -178,6 +178,11 @@ ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
 CSRF_TRUSTED_ORIGINS = [
     'https://toeman.online',
     'https://www.toeman.online',
+    'https://store.toeman.online',
+    'https://www.store.toeman.online',
+    'http://store.toeman.online',
+    'http://www.store.toeman.online',
+    
 ]
 
 CSRF_COOKIE_SECURE = True
