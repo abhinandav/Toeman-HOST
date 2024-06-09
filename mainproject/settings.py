@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-)vs%lc)oga%n!o9fl3ao8i%)ybe28!=q9*wnp3n$qdlx@p3&76
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -173,7 +173,7 @@ AUTHENTICATION_BACKENDS = [
 
 # AUTH_USER_MODEL = 'egapp.User'
 
-ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online']
+# ALLOWED_HOSTS = ['toeman.online', 'www.toeman.online','store.toeman.online', 'www.store.toeman.online']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://toeman.online',
