@@ -186,4 +186,4 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_DOMAIN = 'toeman.online'
+CSRF_COOKIE_DOMAIN = 'store.toeman.online'
